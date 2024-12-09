@@ -20,10 +20,6 @@ def predict_healthiness_tflite(fat, saturated_fat, carbohydrates, sugars, fiber,
     input_data = np.array([[fat, saturated_fat, carbohydrates, sugars, fiber, sodium, proteins]])
     input_data_scaled = scaler.transform(input_data)  # Scale the input
 
-    # Debugging output
-    print(f"Original input data: {input_data}")
-    print(f"Scaled input data: {input_data_scaled}")
-
     # Set input tensor to the scaled input data
     interpreter.set_tensor(input_details[0]['index'], input_data_scaled.astype(np.float32))
 
@@ -33,15 +29,11 @@ def predict_healthiness_tflite(fat, saturated_fat, carbohydrates, sugars, fiber,
     # Get prediction
     prediction = interpreter.get_tensor(output_details[0]['index'])[0][0]
 
-    # Debugging output
-    print(f"Model prediction: {prediction}")
-
     # Determine healthiness
     health_status = "Healthy" if prediction > 0.5 else "Unhealthy"
 
     # Recommendation logic
     if health_status == "Healthy":
-        print(f"Checking recommendation logic for Healthy status with sugars: {sugars}, sodium: {sodium}, fat: {fat}")
         if (24 <= sugars < 50) and (1 <= sodium < 2) and (34 <= fat < 67):
             recommendation = "Good to consume 1 time per day"
         elif (15 <= sugars < 24) and (0.7 <= sodium < 1) and (22 <= fat < 34):
@@ -52,10 +44,6 @@ def predict_healthiness_tflite(fat, saturated_fat, carbohydrates, sugars, fiber,
             recommendation = "Good to consume in moderate amounts"
     else:
         recommendation = "Better not to consume"
-
-    # Debugging output
-    print(f"Health status: {health_status}")
-    print(f"Recommendation: {recommendation}")
 
     return {"health_status": health_status, "recommendation": recommendation}
 
@@ -74,9 +62,6 @@ def predict():
         fiber = nutritions.get('fiber', 0)
         sodium = nutritions.get('sodium', 0)
         proteins = nutritions.get('protein', 0)
-
-        # Debugging output
-        print(f"Received nutritions data: {nutritions}")
 
         result = predict_healthiness_tflite(fat, saturated_fat, carbohydrates, sugars, fiber, sodium, proteins)
         return jsonify(result)
